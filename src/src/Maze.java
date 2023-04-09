@@ -1,4 +1,5 @@
 package src;
+import java.awt.*;
 import java.util.*;
 
 
@@ -13,7 +14,6 @@ public class Maze {
 
     static void makeMaze(int cols, int rows)
     {
-        //ArrayList<char[][]> visited = new ArrayList<char[][]>();
         maze = new Block [rows][cols];
         for (int row = 0; row < maze.length; row++)
         {
@@ -33,49 +33,41 @@ public class Maze {
 
     public static void backtracker(int[] location)
     {
-        int[] successor = new int[2];
-        printMaze();
-        visited.add(location);
-        Map<Integer, int[]> nei = NeumannNeighbourhood(location);
-        Map<Integer, int[]> notVisited = new HashMap<>();
-        for (Map.Entry<Integer, int[]> entry: nei.entrySet())
-        {
-            if(!visited.contains(entry.getValue()))
-            {
-                notVisited.put(entry.getKey(),entry.getValue());
+        while(visited.size() < maze.length*maze[0].length) {
+            int[] successor = new int[2];
+            visited.add(location);
+            Map<Integer, int[]> nei = NeumannNeighbourhood(location);
+            Map<Integer, int[]> notVisited = new HashMap<>();
+            for (Map.Entry<Integer, int[]> entry : nei.entrySet()) {
+                if (!visited.contains(entry.getValue())) {
+                    notVisited.put(entry.getKey(), entry.getValue());
+                }
+            }
+            if (notVisited.size() > 0) {
+                int rand_elem_index = getRandomElemIndex(nei);
+                int key = getKey(nei, rand_elem_index);
+                successor = nei.get(key);
+                maze[successor[0]][successor[1]].removeBorder(key);
+                backtracker(successor);
+
+            } else {
+                int rand_visited;
+                rand_visited = getRand_elem_index();
+                int i = 0;
+                for (Object obj : visited) {
+                    if (i == rand_visited)
+                        successor = (int[]) obj;
+                    i++;
+                }
+                backtracker(successor);
             }
         }
-        if (notVisited.size() > 0)
-        {
-            int rand_elem_index = getRandomElemIndex(nei);
-            int key = getKey(nei, rand_elem_index);
-            successor = nei.get(key);
-            maze[successor[0]][successor[1]].removeBorder(key);
-            backtracker(successor);
-
-        }
-        else
-        {
-            int rand_visited;
-            rand_visited = getRand_elem_index();
-            int i = 0;
-            for(Object obj : visited)
-            {
-                if (i == rand_visited)
-                    successor = (int[]) obj;
-                i++;
-            }
-            backtracker(successor);
-
-        }
-
-
     }
 
     private static int getKey(Map<Integer, int[]> nei, int rand_elem_index) {
-        Integer[] values = (Integer[]) nei.keySet().toArray();
-        int key = values[rand_elem_index];
-        return key;
+        Object[] values =  nei.keySet().toArray();
+        Object key = values[rand_elem_index];
+        return (int)key;
     }
 
     public static int getRandomElemIndex(Map<Integer, int[]> nei)
@@ -86,14 +78,6 @@ public class Maze {
 
     private static int getRand_elem_index() {
         return new Random().nextInt(visited.size());
-    }
-
-    public static void printMaze()
-    {
-            // Loop through all elements of current row
-            //for(char[] x: maze)
-            //    System.out.println(Arrays.toString(x));
-        //System.out.println();
     }
 
 
@@ -120,6 +104,51 @@ public class Maze {
     public static int[] getCoordinate(int x, int y)
     {
         return new int[] {x,y};
+    }
+
+    public static void removeAdjacentBorders()
+    {
+        for (int row = 0; row < maze.length; row++)
+        {
+            for (int col = 0; col < maze[0].length; col++)
+            {
+                if (row<maze.length-1)
+                {
+                    maze[row][col].removeBorder(1);
+                }
+                if (col<maze.length-1)
+                {
+                    maze[row][col].removeBorder(2);
+                }
+            }
+        }
+    }
+
+    public static void draw(Graphics g)
+    {
+        g.setColor(Color.BLACK);
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
+            {
+                if(maze[i][j].borders.get(0))
+                {
+                    g.drawLine(maze[i][j].x, maze[i][j].y, (i + 1) * size, j * size);
+                }
+                if(maze[i][j].borders.get(1))
+                {
+                    g.drawLine(maze[i][j].x, (j + 1) * size, (i + 1) * size, (j + 1) * size);
+                }
+                if(maze[i][j].borders.get(2))
+                {
+                    g.drawLine(maze[i][j].x, maze[i][j].y, maze[i][j].x, (j + 1) * size);
+                }
+                if(maze[i][j].borders.get(3))
+                {
+                    g.drawLine((i + 1) * size, maze[i][j].y, (i + 1) * size, (j + 1) * size);
+                }
+            }
+        }
     }
 
 }

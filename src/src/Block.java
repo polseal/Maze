@@ -20,10 +20,11 @@ public class Block {
         this.borders = Arrays.asList(true,true,true,true); //up, down, left, right
     }
 
-    // TODO: 30/03/2023   
+
     public void removeBorder(int i)
     {
         this.borders.set(i, false);
     }
+
 
 }

@@ -1,36 +1,43 @@
 package src;
-
 import javax.swing.*;
 import java.awt.*;
+import java.io.*;
+
+import static src.Maze.*;
 
 public class MyJFrame
 {
-    private JFrame frame;
-
-    public MyJFrame()
+    public static void main(String[] args) throws IOException, InterruptedException
     {
-        initialize();
+
+            cols = 6;
+            rows = 6;
+            Maze.makeMaze(rows, cols);
+            Maze.removeAdjacentBorders();
+            JFrame frame = new JFrame("Maze");
+            MazePanel panel = new MazePanel(maze);
+            JScrollPane scrollPane = new JScrollPane(panel);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setSize(1000, 800);
+            frame.add(scrollPane, BorderLayout.CENTER);
+            frame.setVisible(true);
+            backtracker(getRandomStart());
 
     }
+}
 
-    private void initialize()
+class MazePanel extends JPanel
+{
+    private Block[][] m;
+    public MazePanel(Block[][] ourMaze)
     {
-        frame = new JFrame();
-        this.frame.setTitle("Maze");
-        this.frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        this.frame.setSize(800, 800);
-        this.frame.setLocationRelativeTo(null);
+        m = ourMaze;
+    }
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 5));
-        panel.setBackground(Color.red);
+    public void paintComponent(Graphics page)
+    {
+        super.paintComponent(page);
 
-        Button b = new Button("Button");
-        panel.add(b);
-
-        frame.add(panel, BorderLayout.CENTER);
-
-
-        this.frame.setVisible(true);
+        draw(page);
     }
 }
