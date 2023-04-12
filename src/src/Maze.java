@@ -7,9 +7,7 @@ public class Maze {
 
     public static int cols, rows;
     public static Block [][] maze;
-    public static Set<int[]> visited = new HashSet<>();
-    public static int [] coordinates_start;
-    public static char start;
+    public static Set<Coordinates> visited = new HashSet<>();
     public static int size = 40;
 
     static void makeMaze(int cols, int rows)
@@ -31,46 +29,60 @@ public class Maze {
 
     }
 
-    public static void backtracker(int[] location)
-    {
-        while(visited.size() < maze.length*maze[0].length) {
-            int[] successor = new int[2];
+    public static void algorithm() {
+        try {
+            backtracker(getRandomStart());
+        } catch (Exception e) {
+
+        }
+    }
+
+
+    public static void backtracker(Coordinates location) throws Exception {
+
+            if(visited.size() == cols*rows)
+            {
+                throw new Exception();
+            }
+
+            Coordinates successor = null;
             visited.add(location);
-            Map<Integer, int[]> nei = NeumannNeighbourhood(location);
-            Map<Integer, int[]> notVisited = new HashMap<>();
-            for (Map.Entry<Integer, int[]> entry : nei.entrySet()) {
+            Map<Integer, Coordinates> neighbourhood = NeumannNeighbourhood(location);
+            Map<Integer, Coordinates> notVisited = new HashMap<>();
+            for (Map.Entry<Integer, Coordinates> entry : neighbourhood.entrySet()) {
+
                 if (!visited.contains(entry.getValue())) {
                     notVisited.put(entry.getKey(), entry.getValue());
                 }
             }
             if (notVisited.size() > 0) {
-                int rand_elem_index = getRandomElemIndex(nei);
-                int key = getKey(nei, rand_elem_index);
-                successor = nei.get(key);
-                maze[successor[0]][successor[1]].removeBorder(key);
+                int rand_elem_index = getRandomElemIndex(notVisited);
+                int key = getKey(notVisited, rand_elem_index);
+                successor = notVisited.get(key);
+                maze[successor.x()][successor.y()].removeBorder(key);
                 backtracker(successor);
-
             } else {
                 int rand_visited;
                 rand_visited = getRand_elem_index();
                 int i = 0;
-                for (Object obj : visited) {
-                    if (i == rand_visited)
-                        successor = (int[]) obj;
+                for (Coordinates obj : visited) {
+                    if (i == rand_visited) {
+                        successor = obj;
+                        break;
+                    }
                     i++;
                 }
                 backtracker(successor);
             }
-        }
     }
 
-    private static int getKey(Map<Integer, int[]> nei, int rand_elem_index) {
-        Object[] values =  nei.keySet().toArray();
+    private static int getKey(Map<Integer, Coordinates> available, int rand_elem_index) {
+        Object[] values =  available.keySet().toArray();
         Object key = values[rand_elem_index];
         return (int)key;
     }
 
-    public static int getRandomElemIndex(Map<Integer, int[]> nei)
+    public static int getRandomElemIndex(Map<Integer, Coordinates> nei)
     {
         return new Random().nextInt(nei.size());
     }
@@ -81,29 +93,26 @@ public class Maze {
     }
 
 
-    public static int[] getRandomStart() {
-        int[] coordinates = new int[2];
+    public static Coordinates getRandomStart() {
         int rnd_rows = new Random().nextInt(maze.length);
         int rnd_columns = new Random().nextInt(maze[0].length);
-        coordinates[0] = rnd_rows;
-        coordinates[1] = rnd_columns;
-        return coordinates;
+        return new Coordinates (rnd_rows,rnd_columns);
     }
 
 
-    static Map<Integer, int[]> NeumannNeighbourhood(int [] location)
+    static Map<Integer, Coordinates> NeumannNeighbourhood(Coordinates location)
     {
-        Map<Integer, int[]> map = new HashMap<>();
-        int[] down = location[0] + 1 < maze.length ? map.put(1, getCoordinate(location[0] + 1, location[1])) : null;
-        int[] up = location[0]-1>=0 ? map.put(0, getCoordinate(location[0]-1, location[1])) : null;
-        int[] left = location[1]-1>= 0 ? map.put(2, getCoordinate(location[0], location[1]-1)) : null;
-        int[] right = location[1]+1< maze[0].length ? map.put(3, getCoordinate(location[0], location[1]+1)) : null;
+        Map<Integer, Coordinates> map = new HashMap<>();
+        Coordinates down = location.x() + 1 < maze.length ? map.put(1, getCoordinate(location.x() + 1, location.y())) : null;
+        Coordinates up = location.x()-1>=0 ? map.put(0, getCoordinate(location.x()-1, location.y())) : null;
+        Coordinates left = location.y()-1>= 0 ? map.put(2, getCoordinate(location.x(), location.y()-1)) : null;
+        Coordinates right = location.y()+1< maze[0].length ? map.put(3, getCoordinate(location.x(), location.y()+1)) : null;
         return map;
     }
 
-    public static int[] getCoordinate(int x, int y)
+    public static Coordinates getCoordinate(int x, int y)
     {
-        return new int[] {x,y};
+        return new Coordinates (x,y);
     }
 
     public static void removeAdjacentBorders()
@@ -112,11 +121,11 @@ public class Maze {
         {
             for (int col = 0; col < maze[0].length; col++)
             {
-                if (row<maze.length-1)
+                if (row!=maze.length-1)
                 {
                     maze[row][col].removeBorder(1);
                 }
-                if (col<maze.length-1)
+                if (col!=maze[0].length-1)
                 {
                     maze[row][col].removeBorder(2);
                 }
@@ -124,31 +133,6 @@ public class Maze {
         }
     }
 
-    public static void draw(Graphics g)
-    {
-        g.setColor(Color.BLACK);
-        for (int i = 0; i < rows; i++)
-        {
-            for (int j = 0; j < cols; j++)
-            {
-                if(maze[i][j].borders.get(0))
-                {
-                    g.drawLine(maze[i][j].x, maze[i][j].y, (i + 1) * size, j * size);
-                }
-                if(maze[i][j].borders.get(1))
-                {
-                    g.drawLine(maze[i][j].x, (j + 1) * size, (i + 1) * size, (j + 1) * size);
-                }
-                if(maze[i][j].borders.get(2))
-                {
-                    g.drawLine(maze[i][j].x, maze[i][j].y, maze[i][j].x, (j + 1) * size);
-                }
-                if(maze[i][j].borders.get(3))
-                {
-                    g.drawLine((i + 1) * size, maze[i][j].y, (i + 1) * size, (j + 1) * size);
-                }
-            }
-        }
-    }
+
 
 }
