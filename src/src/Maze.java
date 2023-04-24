@@ -1,6 +1,7 @@
 package src;
 import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 
 public class Maze {
@@ -13,15 +14,13 @@ public class Maze {
     static void makeMaze(int cols, int rows)
     {
         maze = new Block [rows][cols];
-        for (int row = 0; row < maze.length; row++)
+        for (int row = maze.length-1; row >=0 ; row--)
         {
-            for (int col = 0; col < maze[0].length; col++)
+            for (int col = maze[0].length-1; col >=0; col--)
         {
             maze[row][col] = new Block(row,col);
         }
         }
-
-
     }
 
     public Maze()
@@ -36,7 +35,6 @@ public class Maze {
 
         }
     }
-
 
     public static void backtracker(Coordinates location) throws Exception {
 
@@ -59,7 +57,9 @@ public class Maze {
                 int rand_elem_index = getRandomElemIndex(notVisited);
                 int key = getKey(notVisited, rand_elem_index);
                 successor = notVisited.get(key);
-                maze[successor.x()][successor.y()].removeBorder(key);
+                maze[location.x()][location.y()].removeBorder(key);
+                maze[successor.x()][successor.y()].removeBorder(returnTheOpposite(key));
+                System.out.println("Direction " + key + " X:" + successor.x() + " Y:" + successor.y());
                 backtracker(successor);
             } else {
                 int rand_visited;
@@ -68,12 +68,24 @@ public class Maze {
                 for (Coordinates obj : visited) {
                     if (i == rand_visited) {
                         successor = obj;
+                        System.out.println(" X:" + successor.x() + " Y:" + successor.y());
                         break;
                     }
                     i++;
                 }
                 backtracker(successor);
             }
+    }
+
+    private static int returnTheOpposite(int key)
+    {
+        return switch (key) {
+            case 0 -> 1;
+            case 1 -> 0;
+            case 2 -> 3;
+            case 3 -> 2;
+            default -> -1;
+        };
     }
 
     private static int getKey(Map<Integer, Coordinates> available, int rand_elem_index) {
@@ -87,18 +99,15 @@ public class Maze {
         return new Random().nextInt(nei.size());
     }
 
-
     private static int getRand_elem_index() {
         return new Random().nextInt(visited.size());
     }
-
 
     public static Coordinates getRandomStart() {
         int rnd_rows = new Random().nextInt(maze.length);
         int rnd_columns = new Random().nextInt(maze[0].length);
         return new Coordinates (rnd_rows,rnd_columns);
     }
-
 
     static Map<Integer, Coordinates> NeumannNeighbourhood(Coordinates location)
     {
@@ -115,24 +124,9 @@ public class Maze {
         return new Coordinates (x,y);
     }
 
-    public static void removeAdjacentBorders()
+    public static void createEntryExit()
     {
-        for (int row = 0; row < maze.length; row++)
-        {
-            for (int col = 0; col < maze[0].length; col++)
-            {
-                if (row!=maze.length-1)
-                {
-                    maze[row][col].removeBorder(1);
-                }
-                if (col!=maze[0].length-1)
-                {
-                    maze[row][col].removeBorder(2);
-                }
-            }
-        }
+        maze[0][0].borders.set(0, false);
+        maze[rows-1][cols-2].borders.set(1, false);
     }
-
-
-
 }

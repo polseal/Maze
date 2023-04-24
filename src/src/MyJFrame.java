@@ -4,15 +4,17 @@ import java.awt.*;
 import java.io.*;
 
 import static src.Maze.*;
+import static src.Maze.size;
 
 public class MyJFrame
 {
     public static void main(String[] args) {
 
-            cols = 10;
-            rows = 10;
+            cols = 7;
+            rows = 7;
             Maze.makeMaze(rows, cols);
-            Maze.removeAdjacentBorders();
+            Maze.createEntryExit();
+            //Maze.removeAdjacentBorders();
             JFrame frame = new JFrame("Maze");
             MazePanel panel = new MazePanel();
             JScrollPane scrollPane = new JScrollPane(panel);
@@ -38,30 +40,62 @@ class MazePanel extends JPanel
         draw(page);
     }
 
-    public static void draw(Graphics g)
+    /*public static void draw(Graphics g)
     {
+        int buffer = 10;
         g.setColor(Color.BLACK);
         for (int i = 0; i < rows; i++)
         {
             for (int j = 0; j < cols; j++)
             {
-                if(maze[i][j].borders.get(0))
+                if(maze[i][j].borders.get(0)) //up
                 {
-                    g.drawLine(maze[i][j].x, maze[i][j].y, (i + 1) * size, j * size);
+                    g.drawLine(buffer+maze[i][j].x, buffer+maze[i][j].y, buffer+(i + 1) * size, buffer+j * size);
                 }
-                if(maze[i][j].borders.get(1))
+                if(maze[i][j].borders.get(1)) //down
                 {
-                    g.drawLine(maze[i][j].x, (j + 1) * size, (i + 1) * size, (j + 1) * size);
+                    g.drawLine(buffer+maze[i][j].x, buffer+(j + 1) * size, buffer+(i + 1) * size, buffer+(j + 1) * size);
                 }
-                if(maze[i][j].borders.get(2))
+                if(maze[i][j].borders.get(2)) //left
                 {
-                    g.drawLine(maze[i][j].x, maze[i][j].y, maze[i][j].x, (j + 1) * size);
+                    g.drawLine(buffer+maze[i][j].x, buffer+maze[i][j].y, buffer+maze[i][j].x, buffer+(j + 1) * size);
                 }
-                if(maze[i][j].borders.get(3))
+                if(maze[i][j].borders.get(3)) //right
                 {
-                    g.drawLine((i + 1) * size, maze[i][j].y, (i + 1) * size, (j + 1) * size);
+                    g.drawLine(buffer+(i + 1) * size, buffer+maze[i][j].y, buffer+(i + 1) * size, buffer+(j + 1) * size);
                 }
             }
         }
+    }*/
+
+    public static void draw(Graphics g) {
+        int buffer = 10;
+        g.setColor(Color.BLACK);
+
+
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
+            {
+                if(maze[i][j].borders.get(0)) //up
+                {
+                    g.drawLine(buffer+j*size, buffer+i*size, buffer+(j+1)*size, buffer+i*size);
+                }
+                if(maze[i][j].borders.get(1)) //down
+                {
+                    g.drawLine(buffer+j*size, buffer+(i+1)*size, buffer+(j+1)*size, buffer+(i+1)*size);
+                }
+                if(maze[i][j].borders.get(2)) //left
+                {
+                    g.drawLine(buffer+j*size, buffer+i*size, buffer+j*size, buffer+(i+1)*size);
+                }
+                if(maze[i][j].borders.get(3)) //right
+                {
+                    g.drawLine(buffer+(j+1)*size, buffer+i*size, buffer+(j+1)*size, buffer+(i+1)*size);
+                }
+            }
+        }
+
+
     }
 }
